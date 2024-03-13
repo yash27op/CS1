@@ -1,0 +1,219 @@
+echo on
+N=1000;
+M=75;
+Rx_av=zeros(1,M+ 1 );
+Sx_av=zeros(1,M+ 1);
+for j=1:10, % Take the ensemble average over ten realizations
+end;
+X=rand(1,N)-1/2; % N i.i.d. uniformly distributed random variables
+% between -112 and 112.
+Rx=Rx_est(X,M); % autocorrelation of the realization
+Sx=fftshift(abs(fft(Rx))); % power spectrum of the realization
+Rx_av=Rx_av+Rx;
+Sx_av=Sx_av+Sx;
+echo off ;
+% sum of the autocorrelations
+% sum of the spectrums
+echo on ;
+Rx_av=Rx_av/10;
+Sx_av=Sx_av/10;
+% Plot Ensemble Average Spectrum
+figure;
+subplot(2, 1, 1);
+plot(Sx_av);
+title('Ensemble Average Spectrum');
+xlabel('Frequency');
+ylabel('Magnitude');
+% Plot Ensemble Average Autocorrelation
+subplot(2, 1, 2);
+plot(Rx_av);
+title('Ensemble Average Autocorrelation');
+xlabel('Lag');
+ylabel('Autocorrelation');
+% Plot FFT of Ensemble Average Spectrum
+figure;
+subplot(2, 1, 1);
+Sxy = fftshift(abs(fft(Sx_av)));
+plot(Sxy);
+title('FFT of Ensemble Average Spectrum');
+xlabel('Frequency');
+ylabel('Magnitude');
+% Plot FFT of Autocorrelation
+subplot(2, 1, 2);
+xy = fftshift(abs(fft(Rx_av)));
+plot(xy);
+title('FFT of Ensemble Average Autocorrelation');
+xlabel('Frequency');
+ylabel('Magnitude');
+% ensemble average autocorrelation
+% ensemble average spectrum
+function[Rx] = Rx_est(X,M)
+N = 1000;
+Rx = zeros(1,M+1);
+for m=1:M+1
+ for n=1:N-m+1
+ Rx(m) = Rx(m) + X(n)*X(n+m-1);
+ end
+ Rx(m) = Rx(m)/(N-m+1);
+end
+end
+
+
+
+Low Pass Samples,
+
+N = 1000; % The maximum value of n
+M = 50;
+Rxav = zeros(1, M + 1);
+Ryav = zeros(1, M + 1);
+Sxav = zeros(1, M + 1);
+Syav = zeros(1, M + 1);
+% Perform ensemble averaging over ten realizations
+for i = 1:10
+ X = rand(1, N) - (1/2);
+ Y(1) = 0;
+ 
+ % Generate Y(n) using a first-order autoregressive process
+ for n = 2:N
+ Y(n) = 0.9 * Y(n - 1) + X(n);
+ end
+ 
+ % Compute autocorrelations of X(n) and Y(n)
+ Rx = Rx_est(X, M);
+ Ry = Rx_est(Y, M);
+ 
+ % Compute power spectra of X(n) and Y(n)
+ Sx = fftshift(abs(fft(Rx)));
+ Sy = fftshift(abs(fft(Ry)));
+ 
+ % Accumulate results for ensemble averaging
+ Rxav = Rxav + Rx;
+ Ryav = Ryav + Ry;
+ Sxav = Sxav + Sx;
+ Syav = Syav + Sy;
+end
+% Average over the ten realizations
+Rxav = Rxav / 10;
+Ryav = Ryav / 10;
+Sxav = Sxav / 10;
+Syav = Syav / 10;
+% Display results
+disp('Ensemble Average Autocorrelation of X:');
+disp(Rxav);
+disp('Ensemble Average Autocorrelation of Y:');
+disp(Ryav);
+disp('Ensemble Average Power Spectrum of X:');
+disp(Sxav);
+disp('Ensemble Average Power Spectrum of Y:');
+disp(Syav);
+% Plot Ensemble Average Autocorrelations and Power Spectra
+figure;
+% Plot Ensemble Average Autocorrelations
+subplot(2, 1, 1);
+plot(0:M, Rxav, 'DisplayName', 'X(n)');
+title('Ensemble Average Autocorrelations');
+xlabel('Lag');
+ylabel('Autocorrelation');
+legend;
+subplot(2, 1, 2);
+plot(0:M, Ryav, 'DisplayName', 'Y(n)');
+title('Ensemble Average Autocorrelations');
+xlabel('Lag');
+ylabel('Autocorrelation');
+legend;
+figure;
+% Plot Ensemble Average Power Spectra
+subplot(2, 1, 1);
+frequencies = linspace(-0.5, 0.5, M + 1);
+plot(frequencies, Sxav, 'DisplayName', 'X(n)');
+title('Ensemble Average Power Spectra');
+xlabel('Normalized Frequency');
+ylabel('Power Spectral Density');
+legend;
+subplot(2, 1, 2);
+plot(frequencies, Syav, 'DisplayName', 'Y(n)');
+title('Ensemble Average Power Spectra');
+xlabel('Normalized Frequency');
+ylabel('Power Spectral Density');
+legend;
+% Autocorrelation estimation function
+function [Rx] = Rx_est(X, M)
+ N = length(X);
+ Rx = zeros(1, M + 1);
+ 
+ for m = 1:M + 1
+ for n = 1:N - m + 1
+ Rx(m) = Rx(m) + X(n) * X(n + m - 1);
+ end
+ Rx(m) = Rx(m) / (N - m + 1);
+ end
+end
+
+
+
+Bandpass Samples,
+
+N = 1000; % number of samples
+for i = 1:2:N
+ % Your loop body is currently empty. If you have code to include here, add it.
+end
+m = 0;
+sgma = 1;
+% Initialize arrays to store Gaussian random variables
+Xl = zeros(1, N);
+X2 = zeros(1, N);
+% Generate Gaussian random variables
+for i = 1:2:N
+ [Xl(i), Xl(i + 1)] = gngauss(m, sgma);
+ [X2(i), X2(i + 1)] = gngauss(m, sgma);
+end
+% Initialize filter coefficients
+A = [1, -0.9];
+B = 1;
+% Filter the Gaussian random variables
+Xc = filter(B, A, Xl);
+Xs = filter(B, A, X2);
+% Bandpass modulation
+fc = 1000 / pi;
+band_pass_process = zeros(1, N);
+for i = 1:N
+ band_pass_process(i) = Xc(i) * cos(2 * pi * fc * i) - Xs(i) * sin(2 * pi * fc 
+* i);
+end
+% Determine the autocorrelation and the spectrum of the bandpass process
+M = 50;
+bpp_autoco = Rx_est(band_pass_process, M);
+bpp_spectrum = fftshift(abs(fft(bpp_autoco)));
+% Plotting commands
+figure;
+subplot(2, 1, 1);
+plot(0:M, bpp_autoco);
+title('Autocorrelation of Bandpass Process');
+xlabel('Lag');
+ylabel('Autocorrelation');
+subplot(2, 1, 2);
+frequencies = linspace(-0.5, 0.5, M + 1);
+plot(frequencies, bpp_spectrum);
+title('Power Spectral Density of Bandpass Process');
+xlabel('Normalized Frequency');
+ylabel('Power Spectral Density');
+% Function to generate Gaussian random variables
+function [gsrvl, gsrv2] = gngauss(m, sgma)
+ u = rand;
+ z = sgma * (sqrt(2 * log(1 / (1 - u))));
+ u = rand;
+ gsrvl = m + z * cos(2 * pi * u);
+ gsrv2 = m + z * sin(2 * pi * u);
+end
+% Autocorrelation estimation function
+function [Rx] = Rx_est(X, M)
+ N = length(X);
+ Rx = zeros(1, M + 1);
+ 
+ for m = 1:M + 1
+ for n = 1:N - m + 1
+ Rx(m) = Rx(m) + X(n) * X(n + m - 1);
+ end
+ Rx(m) = Rx(m) / (N - m + 1);
+ end
+end
